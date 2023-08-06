@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -15,16 +16,29 @@ class _HomeScreenState extends State<HomeScreen> {
   String qoute = "";
   String author = "";
   Timer? timer;
-  static const maxDuration = 60 * 60 * 24;
+  static const maxDuration = 10;
   int _duration = maxDuration;
   // int _duration = maxDuration;
 
-  void cooldown() {
+  void load_qoute() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      qoute = (prefs.getString('qoute')) ?? "";
+      author = (prefs.getString('author')) ?? "";
+      _duration = (prefs.getInt('duration')) ?? maxDuration;
+    });
+  }
+
+  void cooldown() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setString('qoute', qoute);
+    prefs.setString('author', author);
     timer = Timer.periodic(Duration(seconds: 1), (_) {
       if (_duration > 0) {
         setState(() {
           _duration--;
         });
+        prefs.setInt("duration", _duration);
       } else {
         stop_cooldown();
       }
@@ -35,11 +49,21 @@ class _HomeScreenState extends State<HomeScreen> {
     timer?.cancel();
   }
 
-  void reset_cooldown() {
-    // stop_cooldown();
+  void reset_cooldown() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.remove(qoute);
+    prefs.remove(author);
     setState(() {
       _duration = maxDuration;
     });
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    cooldown();
+    load_qoute();
   }
 
   @override
@@ -53,8 +77,17 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         body: Column(
           children: [
+            ElevatedButton(
+              onPressed: () async {
+                load_qoute();
+                print(_duration);
+                print(qoute);
+                print(author);
+              },
+              child: Text('test'),
+            ),
             Padding(padding: EdgeInsets.only(top: 5)),
-            // Text(_duration.toString()),
+            Text(_duration.toString()),
             if (qoute == "" || _duration == 0)
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
@@ -74,9 +107,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   print(data['author']);
                   qoute = data['content'];
                   author = data['author'];
+
                   cooldown();
                   reset_cooldown();
-
                   print(_duration);
                   setState(() {});
                 },
