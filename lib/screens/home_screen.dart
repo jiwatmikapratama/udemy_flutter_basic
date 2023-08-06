@@ -15,54 +15,77 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   String qoute = "";
   String author = "";
-  Timer? timer;
-  static const maxDuration = 10;
-  int _duration = maxDuration;
+  // Timer? timer;
+  // static const maxDuration = 10;
   // int _duration = maxDuration;
+  // // int _duration = maxDuration;
+
+  // void load_qoute() async {
+  //   SharedPreferences prefs = await SharedPreferences.getInstance();
+  //   setState(() {
+  //     qoute = (prefs.getString('qoute')) ?? "";
+  //     author = (prefs.getString('author')) ?? "";
+  //     _duration = (prefs.getInt('duration')) ?? maxDuration;
+  //   });
+  // }
+
+  // void cooldown() async {
+  //   SharedPreferences prefs = await SharedPreferences.getInstance();
+  //   prefs.setString('qoute', qoute);
+  //   prefs.setString('author', author);
+  //   timer = Timer.periodic(Duration(seconds: 1), (_) {
+  //     if (_duration > 0) {
+  //       setState(() {
+  //         _duration--;
+  //       });
+  //       prefs.setInt("duration", _duration);
+  //     } else {
+  //       stop_cooldown();
+  //     }
+  //   });
+  // }
+
+  // void stop_cooldown() {
+  //   timer?.cancel();
+  // }
+
+  // void reset_cooldown() async {
+  //   SharedPreferences prefs = await SharedPreferences.getInstance();
+  //   prefs.remove(qoute);
+  //   prefs.remove(author);
+  //   setState(() {
+  //     _duration = maxDuration;
+  //   });
+  // }
 
   void load_qoute() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
       qoute = (prefs.getString('qoute')) ?? "";
       author = (prefs.getString('author')) ?? "";
-      _duration = (prefs.getInt('duration')) ?? maxDuration;
     });
+    // }
   }
 
-  void cooldown() async {
+  void set_qoute() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setString('qoute', qoute);
     prefs.setString('author', author);
-    timer = Timer.periodic(Duration(seconds: 1), (_) {
-      if (_duration > 0) {
-        setState(() {
-          _duration--;
-        });
-        prefs.setInt("duration", _duration);
-      } else {
-        stop_cooldown();
-      }
-    });
   }
 
-  void stop_cooldown() {
-    timer?.cancel();
-  }
-
-  void reset_cooldown() async {
+  void reset_qoute() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.remove(qoute);
-    prefs.remove(author);
-    setState(() {
-      _duration = maxDuration;
-    });
+    await prefs.clear();
+    qoute = "";
+    author = "";
+    setState(() {});
   }
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    cooldown();
+    // cooldown();
     load_qoute();
   }
 
@@ -77,25 +100,26 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         body: Column(
           children: [
-            ElevatedButton(
-              onPressed: () async {
-                load_qoute();
-                print(_duration);
-                print(qoute);
-                print(author);
-              },
-              child: Text('test'),
-            ),
+            // ElevatedButton(
+            //   onPressed: () async {
+            //     load_qoute();
+            //     // print(_duration);
+            //     print(qoute);
+            //     print(author);
+            //   },
+            //   child: Text('test'),
+            // ),
             Padding(padding: EdgeInsets.only(top: 5)),
-            Text(_duration.toString()),
-            if (qoute == "" || _duration == 0)
+            // Text(_duration.toString()),
+            // if (qoute == "" || _duration == 0)
+            if (qoute == "")
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.purple,
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 50, vertical: 20),
+                        horizontal: 30, vertical: 20),
                     textStyle: const TextStyle(
-                        fontSize: 30, fontWeight: FontWeight.bold)),
+                        fontSize: 20, fontWeight: FontWeight.bold)),
                 onPressed: () async {
                   var url = Uri.parse(
                       'https://api.quotable.io/random?tags=technology%2Cfamous-quotes');
@@ -108,13 +132,33 @@ class _HomeScreenState extends State<HomeScreen> {
                   qoute = data['content'];
                   author = data['author'];
 
-                  cooldown();
-                  reset_cooldown();
-                  print(_duration);
+                  set_qoute();
+                  // cooldown();
+                  // reset_cooldown();
+                  // print(_duration);
                   setState(() {});
                 },
-                child: Text("Generate Today Qoute"),
+                child: Text("Generate Qoute"),
               ),
+            Padding(padding: EdgeInsets.only(top: 5)),
+
+            if (qoute != "")
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.purple,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 30, vertical: 20),
+                    textStyle: const TextStyle(
+                        fontSize: 20, fontWeight: FontWeight.bold)),
+                onPressed: () {
+                  reset_qoute();
+                  print(qoute);
+                  print(author);
+                  setState(() {});
+                },
+                child: Text("Reset Qoute"),
+              ),
+
             CardQoute(
               qoute: qoute,
               author: author,
