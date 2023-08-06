@@ -121,8 +121,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     textStyle: const TextStyle(
                         fontSize: 20, fontWeight: FontWeight.bold)),
                 onPressed: () async {
-                  var url = Uri.parse(
-                      'https://api.quotable.io/random?tags=technology%2Cfamous-quotes');
+                  var url = Uri.parse('https://api.quotable.io/random?tags');
                   var response = await http.get(url);
                   // print('Response Status:${response.statusCode}');
                   // print('Response Body:${response.body}');
